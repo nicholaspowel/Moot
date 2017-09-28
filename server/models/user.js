@@ -1,10 +1,10 @@
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 
-// User schema
 const UserSchema = mongoose.Schema({
   username: String,
-  password: String
+  password: String,
+  argument: [{body: String, topic: String, side: String}]
 });
 
 const User = module.exports = mongoose.model('User', UserSchema);
@@ -17,8 +17,8 @@ module.exports.getUserByUsername = (username, callback) => {
   const query = {
     username: new RegExp(`^${username}$`, 'i')
   };
-  
-  User.findOne(query, callback);  
+
+  User.findOne(query, callback);
 };
 
 module.exports.comparePassword = (password, hash, callback) => {
@@ -36,5 +36,18 @@ module.exports.addUser = (newUser, callback) => {
       newUser.save(callback);
     });
   });
+};
+
+//add argument to user's created arguments
+module.exports.addUserArgument = (userName, arg, callback) => {
+  DebateArg.findOneAndUpdate(
+    { username: userName },
+    { $push: { 'argument': {body: arg.body, topic: arg.topic, side: arg.side} } },
+    callback);
+};
+
+//get all of a user's arguments
+module.exports.getUserArgs = (user1, callback) => {
+  DebateArg.find({username:user1}, callback);
 };
 
